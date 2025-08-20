@@ -1,3 +1,4 @@
+
 export enum TaskStatus {
   ToDo = 'To Do',
   InProgress = 'In Progress',
@@ -40,8 +41,7 @@ export interface Task {
 }
 
 export interface Phase {
-  id: string;
-  title: string;
+  title?: string;
   subtitle: string;
   tasks: Task[];
 }

@@ -1,117 +1,96 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Phase, Task, TaskStatus, UploadedFile, FileStatus, Annotation } from './types';
+import { Task, TaskStatus, UploadedFile, FileStatus, Annotation } from './types';
 import { getAIAssistance, summarizeFileContent } from './services/geminiService';
 import Header from './components/Header';
 import ProgressBar from './components/ProgressBar';
-import PhaseCard from './components/PhaseCard';
+import TaskItem from './components/TaskItem';
 import Modal from './components/Modal';
 import { InfoIcon, DownloadIcon } from './components/Icons';
 import JSZip from 'jszip';
 import saveAs from 'file-saver'; // This will be polyfilled by esm.sh
 
-const initialPhases: Phase[] = [
+const initialTasks: Task[] = [
   {
-    id: 'phase1',
-    title: 'Phase 1: Data Collection (1 week)',
-    subtitle: 'Day 1-2: Initial Data Gathering',
-    tasks: [
-      {
-        id: 't1',
-        title: 'Export Support Tickets',
-        description: 'Export the most recent 50-100 tickets to PDF format.',
-        details: [
-          'Prioritize tickets related to PACS Viewer, annotations, and dictation issues.',
-          'These PDFs are crucial for training the language model to understand common issues and resolution patterns.',
-        ],
-        status: TaskStatus.ToDo,
-        files: [],
-        fileConfig: { accept: 'application/pdf', maxFiles: 100, folder: 'SupportTickets' },
-      },
-      {
-        id: 't2',
-        title: 'Screen Capture Collection',
-        description: 'Capture 5-10 typical workflow scenarios in PACS Viewer.',
-        details: [
-          'Use existing screen capture software on the workstation.',
-          'Include examples of annotation processes.',
-          'Aim for 2-3 hours of total screen capture footage.',
-          'Visual data helps in developing the model\'s understanding of UI interactions and workflow patterns.',
-        ],
-        status: TaskStatus.ToDo,
-        files: [],
-        fileConfig: { accept: 'image/*,video/*', maxFiles: 20, folder: 'ScreenCaptures' },
-      },
+    id: 't1',
+    title: 'Export Support Tickets',
+    description: 'Export the most recent 50-100 tickets to PDF format.',
+    details: [
+      'Prioritize tickets related to PACS Viewer, annotations, and dictation issues.',
+      'These PDFs are crucial for training the language model to understand common issues and resolution patterns.',
     ],
+    status: TaskStatus.ToDo,
+    files: [],
+    fileConfig: { accept: 'application/pdf', maxFiles: 100, folder: 'SupportTickets' },
   },
   {
-    id: 'phase2',
-    title: '',
-    subtitle: 'Day 3-4: Log Files and Audio Collection',
-    tasks: [
-      {
-        id: 't3',
-        title: 'Collect Log Files',
-        description: 'Locate and copy log files for PACS, EMR, DICOM, and HL7 systems.',
-        details: [
-          'Copy the most recent week\'s worth of log files to a designated secure location.',
-          'Log files will be used to train the model on system behavior and error patterns.',
-        ],
-        status: TaskStatus.ToDo,
-        files: [],
-        fileConfig: { accept: '.log,text/plain', maxFiles: 50, folder: 'LogFiles' },
-      },
-      {
-        id: 't4',
-        title: 'Gather Dictation Audio Samples',
-        description: 'Collect 10-15 anonymized dictation audio samples.',
-        details: [
-          'Ensure a mix of different radiologists and study types.',
-          'If dictation audio is unavailable, collect any relevant audio recordings from support calls.',
-          'Audio data will help in developing speech-to-text capabilities and understanding dictation-related issues.',
-        ],
-        status: TaskStatus.ToDo,
-        files: [],
-        fileConfig: { accept: 'audio/*', maxFiles: 20, folder: 'AudioSamples' },
-      },
+    id: 't2',
+    title: 'Screen Capture Collection',
+    description: 'Capture 5-10 typical workflow scenarios in PACS Viewer.',
+    details: [
+      'Use existing screen capture software on the workstation.',
+      'Include examples of annotation processes.',
+      'Aim for 2-3 hours of total screen capture footage.',
+      'Visual data helps in developing the model\'s understanding of UI interactions and workflow patterns.',
     ],
+    status: TaskStatus.ToDo,
+    files: [],
+    fileConfig: { accept: 'image/*,video/*', maxFiles: 20, folder: 'ScreenCaptures' },
   },
   {
-    id: 'phase3',
-    title: '',
-    subtitle: 'Day 5: Email Correspondence and Observations',
-    tasks: [
-      {
-        id: 't5',
-        title: 'Compile Email Correspondence',
-        description: 'Export the last month\'s worth of support-related emails.',
-        details: [
-            'Focus on emails that show the triage process and common communication patterns.',
-            'Remove any sensitive or identifying information.',
-            'Email data will be crucial for training the model on communication styles and triage processes.'
-        ],
-        status: TaskStatus.ToDo,
-        files: [],
-        fileConfig: { accept: '.eml,.msg,text/plain', maxFiles: 100, folder: 'Emails' },
-      },
-      {
-        id: 't6',
-        title: 'Document Initial Observations',
-        description: 'Create a brief report noting any initial observations or patterns.',
-        details: [
-            'Focus on insights that could be relevant for developing the GenAI tool.'
-        ],
-        status: TaskStatus.ToDo,
-        files: [],
-        fileConfig: { accept: 'text/markdown,.md,text/plain', maxFiles: 5, folder: 'Observations' },
-      },
+    id: 't3',
+    title: 'Collect Log Files',
+    description: 'Locate and copy log files for PACS, EMR, DICOM, and HL7 systems.',
+    details: [
+      'Copy the most recent week\'s worth of log files to a designated secure location.',
+      'Log files will be used to train the model on system behavior and error patterns.',
     ],
+    status: TaskStatus.ToDo,
+    files: [],
+    fileConfig: { accept: '.log,text/plain', maxFiles: 50, folder: 'LogFiles' },
+  },
+  {
+    id: 't4',
+    title: 'Gather Dictation Audio Samples',
+    description: 'Collect 10-15 anonymized dictation audio samples.',
+    details: [
+      'Ensure a mix of different radiologists and study types.',
+      'If dictation audio is unavailable, collect any relevant audio recordings from support calls.',
+      'Audio data will help in developing speech-to-text capabilities and understanding dictation-related issues.',
+    ],
+    status: TaskStatus.ToDo,
+    files: [],
+    fileConfig: { accept: 'audio/*', maxFiles: 20, folder: 'AudioSamples' },
+  },
+  {
+    id: 't5',
+    title: 'Compile Email Correspondence',
+    description: 'Export the last month\'s worth of support-related emails.',
+    details: [
+        'Focus on emails that show the triage process and common communication patterns.',
+        'Remove any sensitive or identifying information.',
+        'Email data will be crucial for training the model on communication styles and triage processes.'
+    ],
+    status: TaskStatus.ToDo,
+    files: [],
+    fileConfig: { accept: '.eml,.msg,text/plain', maxFiles: 100, folder: 'Emails' },
+  },
+  {
+    id: 't6',
+    title: 'Document Initial Observations',
+    description: 'Create a brief report noting any initial observations or patterns.',
+    details: [
+        'Focus on insights that could be relevant for developing the GenAI tool.'
+    ],
+    status: TaskStatus.ToDo,
+    files: [],
+    fileConfig: { accept: 'text/markdown,.md,text/plain', maxFiles: 5, folder: 'Observations' },
   },
 ];
 
 
 const App: React.FC = () => {
-  const [phases, setPhases] = useState<Phase[]>(initialPhases);
+  const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [progress, setProgress] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState({ title: '', body: '' });
@@ -119,20 +98,16 @@ const App: React.FC = () => {
   const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
-    const allTasks = phases.flatMap(p => p.tasks);
-    const completedTasks = allTasks.filter(t => t.status === TaskStatus.Done);
-    const newProgress = allTasks.length > 0 ? (completedTasks.length / allTasks.length) * 100 : 0;
+    const completedTasks = tasks.filter(t => t.status === TaskStatus.Done);
+    const newProgress = tasks.length > 0 ? (completedTasks.length / tasks.length) * 100 : 0;
     setProgress(newProgress);
-  }, [phases]);
+  }, [tasks]);
 
   const updateTask = (taskId: string, updater: (task: Task) => Task) => {
-    setPhases(prevPhases =>
-      prevPhases.map(phase => ({
-        ...phase,
-        tasks: phase.tasks.map(task =>
-          task.id === taskId ? updater(task) : task
-        ),
-      }))
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.id === taskId ? updater(task) : task
+      )
     );
   };
 
@@ -141,7 +116,7 @@ const App: React.FC = () => {
   }, []);
   
   const handleFilesAdd = useCallback((taskId: string, newFiles: File[]) => {
-      const taskToUpdate = phases.flatMap(p => p.tasks).find(t => t.id === taskId);
+      const taskToUpdate = tasks.find(t => t.id === taskId);
       if (!taskToUpdate || !taskToUpdate.fileConfig) return;
 
       const totalFiles = taskToUpdate.files.length + newFiles.length;
@@ -191,7 +166,7 @@ const App: React.FC = () => {
         }
     });
 
-  }, [phases]);
+  }, [tasks]);
 
   const handleFileRemove = useCallback((taskId: string, fileId: string) => {
       updateTask(taskId, task => ({ ...task, files: task.files.filter(f => f.id !== fileId) }));
@@ -259,25 +234,23 @@ const App: React.FC = () => {
     let fileCount = 0;
     const annotationsByFolder: { [folderName: string]: { [fileName: string]: Annotation[] } } = {};
 
-    phases.forEach(phase => {
-        phase.tasks.forEach(task => {
-            if(task.fileConfig && task.files.length > 0) {
-                const folderName = task.fileConfig.folder;
-                const folder = zip.folder(folderName);
-                if (folder) {
-                    task.files.forEach(uploadedFile => {
-                        folder.file(uploadedFile.name, uploadedFile.content);
-                        fileCount++;
-                        if (uploadedFile.annotations.length > 0) {
-                            if (!annotationsByFolder[folderName]) {
-                                annotationsByFolder[folderName] = {};
-                            }
-                            annotationsByFolder[folderName][uploadedFile.name] = uploadedFile.annotations;
+    tasks.forEach(task => {
+        if(task.fileConfig && task.files.length > 0) {
+            const folderName = task.fileConfig.folder;
+            const folder = zip.folder(folderName);
+            if (folder) {
+                task.files.forEach(uploadedFile => {
+                    folder.file(uploadedFile.name, uploadedFile.content);
+                    fileCount++;
+                    if (uploadedFile.annotations.length > 0) {
+                        if (!annotationsByFolder[folderName]) {
+                            annotationsByFolder[folderName] = {};
                         }
-                    });
-                }
+                        annotationsByFolder[folderName][uploadedFile.name] = uploadedFile.annotations;
+                    }
+                });
             }
-        });
+        }
     });
 
     for (const folderName in annotationsByFolder) {
@@ -340,14 +313,14 @@ const App: React.FC = () => {
             </p>
         </div>
 
-        <main className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {phases.map(phase => (
-            <PhaseCard
-              key={phase.id}
-              phase={phase}
+        <main className="mt-8 grid grid-cols-1 xl:grid-cols-2 gap-6">
+          {tasks.map(task => (
+            <TaskItem
+              key={task.id}
+              task={task}
               onStatusChange={handleStatusChange}
               onGetAITip={handleGetAITip}
-              isLoadingAI={isLoadingAI}
+              isLoading={isLoadingAI === task.id}
               onFilesAdd={handleFilesAdd}
               onFileRemove={handleFileRemove}
               onAnnotationAdd={handleAnnotationAdd}

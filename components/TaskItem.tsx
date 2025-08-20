@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Task, TaskStatus } from '../types';
 import { CheckCircleIcon, ChevronDownIcon, ClockIcon, DotIcon, SparklesIcon } from './Icons';
 import FileUpload from './FileUpload';
@@ -46,7 +46,6 @@ const TaskItem: React.FC<TaskItemProps> = ({
     onAnnotationAdd,
     onAnnotationRemove,
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
   const config = statusConfig[task.status];
   const hasDetails = task.details.length > 0 || task.fileConfig;
   const fileCount = task.files.length;
@@ -74,7 +73,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
         </div>
       </div>
 
-      {isExpanded && hasDetails && (
+      {hasDetails && (
         <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700/50 space-y-4">
           {task.details.length > 0 && (
             <div>
@@ -111,15 +110,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
         </div>
       )}
 
-      <div className="mt-4 flex items-center justify-between">
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          disabled={!hasDetails}
-          className="text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {hasDetails ? (isExpanded ? 'Hide Details' : 'Show Details') : 'No Details'}
-          {fileCount > 0 && !isExpanded && <span className="ml-1.5 text-blue-500">({fileCount} {fileCount === 1 ? 'file' : 'files'})</span>}
-        </button>
+      <div className="mt-4 flex items-center justify-end">
         <button
           onClick={() => onGetAITip(task)}
           disabled={isLoading}
