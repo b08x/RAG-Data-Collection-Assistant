@@ -52,7 +52,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
   const maxFiles = task.fileConfig?.maxFiles || 0;
 
   return (
-    <div className={`p-4 rounded-lg shadow-sm transition-all duration-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600`}>
+    <div className={`p-4 rounded-lg shadow-sm transition-all duration-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 flex flex-col h-full`}>
       <div className="flex items-start justify-between">
         <div className="flex-1 pr-4">
           <p className="font-semibold text-slate-800 dark:text-slate-100">{task.title}</p>
@@ -73,42 +73,47 @@ const TaskItem: React.FC<TaskItemProps> = ({
         </div>
       </div>
 
-      {hasDetails && (
-        <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700/50 space-y-4">
-          {task.details.length > 0 && (
-            <div>
-                <h4 className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-2">Details</h4>
-                <ul className="space-y-1 list-disc list-inside text-sm text-slate-600 dark:text-slate-400">
-                    {task.details.map((detail, index) => <li key={index}>{detail}</li>)}
-                </ul>
-            </div>
-          )}
-          {task.fileConfig && (
-            <div>
-                 <h4 className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-2">
-                    Attached Files ({fileCount}/{maxFiles})
-                </h4>
-                <div className="space-y-2">
-                    {task.files.map(file => (
-                        <FileListItem 
-                            key={file.id} 
-                            uploadedFile={file} 
-                            onRemove={() => onFileRemove(task.id, file.id)}
-                            onAnnotationAdd={(text) => onAnnotationAdd(task.id, file.id, text)}
-                            onAnnotationRemove={(annotationId) => onAnnotationRemove(task.id, file.id, annotationId)}
-                        />
-                    ))}
-                </div>
-                {fileCount < maxFiles && (
-                    <FileUpload 
-                        onFilesAdd={(files) => onFilesAdd(task.id, files)}
-                        accept={task.fileConfig.accept}
-                    />
-                )}
-            </div>
-          )}
-        </div>
-      )}
+      <div className="flex-grow flex flex-col">
+        {hasDetails && (
+          <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700/50 flex-grow flex flex-col">
+            {task.details.length > 0 && (
+              <div className="mb-4">
+                  <h4 className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-2">Details</h4>
+                  <ul className="space-y-1 list-disc list-inside text-sm text-slate-600 dark:text-slate-400">
+                      {task.details.map((detail, index) => <li key={index}>{detail}</li>)}
+                  </ul>
+              </div>
+            )}
+            
+            <div className="flex-grow"></div>
+
+            {task.fileConfig && (
+              <div>
+                   <h4 className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-2">
+                      Attached Files ({fileCount}/{maxFiles})
+                  </h4>
+                  <div className="space-y-2">
+                      {task.files.map(file => (
+                          <FileListItem 
+                              key={file.id} 
+                              uploadedFile={file} 
+                              onRemove={() => onFileRemove(task.id, file.id)}
+                              onAnnotationAdd={(text) => onAnnotationAdd(task.id, file.id, text)}
+                              onAnnotationRemove={(annotationId) => onAnnotationRemove(task.id, file.id, annotationId)}
+                          />
+                      ))}
+                  </div>
+                  {fileCount < maxFiles && (
+                      <FileUpload 
+                          onFilesAdd={(files) => onFilesAdd(task.id, files)}
+                          accept={task.fileConfig.accept}
+                      />
+                  )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       <div className="mt-4 flex items-center justify-end">
         <button
