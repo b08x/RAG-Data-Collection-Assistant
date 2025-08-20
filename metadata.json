@@ -1,0 +1,5 @@
+{
+  "name": "Generative UI for RAG Data Collection",
+  "description": "An interactive generative UI that assists with the data collection process for a context-aware Retrieval-Augmented Generation (RAG) system, specifically tailored for enhancing Radiology IT Support.",
+  "requestFramePermissions": []
+}
