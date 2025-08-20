@@ -52,10 +52,10 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesAdd, accept }) => {
 
   return (
     <div
-      className={`mt-2 p-4 border-2 border-dashed rounded-lg text-center cursor-pointer transition-colors duration-200
+      className={`mt-4 p-8 border-2 border-dashed rounded-lg text-center cursor-pointer transition-colors duration-200 bg-slate-100 dark:bg-slate-800/50
         ${isDragging 
-          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-          : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`
+          ? 'border-blue-500 bg-blue-100 dark:bg-blue-900/50' 
+          : 'border-slate-300 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500'}`
       }
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
@@ -73,11 +73,11 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesAdd, accept }) => {
         aria-label="File uploader"
       />
       <div className="flex flex-col items-center justify-center">
-        <UploadCloudIcon className="w-8 h-8 text-slate-400 dark:text-slate-500 mb-2" />
-        <p className="text-sm text-slate-600 dark:text-slate-400">
+        <UploadCloudIcon className="w-12 h-12 text-slate-500 dark:text-slate-500 mb-4" />
+        <p className="text-lg text-slate-600 dark:text-slate-400">
           <span className="font-semibold text-blue-600 dark:text-blue-400">Click to upload</span> or drag and drop
         </p>
-        <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
+        <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">
           Accepted: {accept.split(',').join(', ')}
         </p>
       </div>
